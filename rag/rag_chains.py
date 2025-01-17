@@ -33,8 +33,8 @@ grade_prompt = ChatPromptTemplate.from_messages(
 )
 
 retrieval_grader = grade_prompt | structured_llm_grader
-question = "agent memory"
-docs = retriever.invoke(question)
+# question = "agent memory"
+# docs = retriever.invoke(question)
 # doc_txt = docs[1].page_content
 # print(retrieval_grader.invoke({"question": question, "document": doc_txt}))
 
@@ -60,7 +60,7 @@ def format_docs(docs):
 rag_chain = prompt | llm | StrOutputParser()
 
 # Run
-generation = rag_chain.invoke({"context": docs, "question": question})
+# generation = rag_chain.invoke({"context": docs, "question": question})
 # print(generation)
 
 ##################### Hallucination Grader ##################################

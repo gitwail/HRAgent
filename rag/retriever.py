@@ -15,31 +15,45 @@ os.environ["LANGCHAIN_API_KEY"] = os.getenv("LANGCHAIN_API_KEY")
 os.environ["LANGCHAIN_ENDPOINT"]=os.getenv("LANGCHAIN_ENDPOINT")
 os.environ["LANGCHAIN_PROJECT"]=os.getenv("LANGCHAIN_PROJECT")
 
+from langchain.document_loaders import PyPDFLoader, JSONLoader
+import json
+from pathlib import Path
+from pprint import pprint
+from langchain.text_splitter import RecursiveCharacterTextSplitter,RecursiveJsonSplitter
+from langchain.vectorstores import Chroma
+from langchain.embeddings import OpenAIEmbeddings
 
-urls = [
-    # "https://lilianweng.github.io/posts/2023-06-23-agent/",
-    # "https://lilianweng.github.io/posts/2023-03-15-prompt-engineering/",
-    # "https://lilianweng.github.io/posts/2023-10-25-adv-attack-llm/",
-    # "https://thegradient.pub/an-introduction-to-the-problems-of-ai-consciousness/",
-    "https://www.ign.com/playlist/rchnemesis/lists/top-100-indie-games"
-]
+# Load the PDF file
+# pdf_path = "rag/documents/ELBANI_CV_LAST.pdf"  
+json_path = "rag/documents/cv_wail.json"  
 
-docs = [WebBaseLoader(url).load() for url in urls]
-docs_list = [item for sublist in docs for item in sublist]
+# loading the jsondata
+json_data = json.loads(Path(json_path).read_text())
 
-text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
-    chunk_size=250, chunk_overlap=0
-)
-doc_splits = text_splitter.split_documents(docs_list)
+# recursive splitter
+splitter = RecursiveJsonSplitter(max_chunk_size=1)
+
+# chunks
+docs = splitter.create_documents(texts=[json_data])
+
 
 # Add to vectorDB
 vectorstore = Chroma.from_documents(
-    documents=doc_splits,
+    documents=docs,
     collection_name="rag-chroma",
     embedding=OpenAIEmbeddings(),
 )
-retriever = vectorstore.as_retriever()
+retriever = vectorstore.as_retriever(
 
-# docs=retriever.invoke("what is an agent?")
+)
 
-# print(docs)
+
+
+################################# testing scripts ######################################
+
+# Example usage: Retrieve documents related to a query
+# docs = retriever.invoke("list the project in which wail worked on ?")
+
+# for i, chunk in enumerate(docs):
+#     print(f"docs {i+1}:\n{chunk.page_content}\n{'-'*50}\n")
+
